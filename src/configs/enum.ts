@@ -1,4 +1,4 @@
-type EnumInfo = {
+export type EnumInfo = {
   value: any
   label: string
 }
