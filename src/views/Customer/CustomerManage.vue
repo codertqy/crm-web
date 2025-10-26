@@ -6,9 +6,9 @@ import { CustomerApi } from '@/api/modules/customer'
 import { CustomerLevelList, CustomerSourceList, FollowUpStatusList, GenderList, IsKeyDecisionMakerList } from '@/configs/enum'
 import { ElMessageBox } from 'element-plus'
 import { useDownload } from '@/hooks/useDownload'
-import { CirclePlus, EditPen, Delete, Download } from '@element-plus/icons-vue'
+import { CirclePlus, EditPen, Delete, Download, Share } from '@element-plus/icons-vue'
 import { useHandleData } from '@/hooks/useHandleData'
-import CustomerDialog from '@/views/Customer/components/CustomerDialog.vue'
+import CustomerDialog from './components/CustomerDialog.vue'
 // 获取 ProTable 元素，调用其获取刷新数据方法（还能获取到当前查询参数，方便导出携带参数）
 const proTable = ref()
 
@@ -120,12 +120,6 @@ const openDrawer = (title: string, row: Partial<any> = {}) => {
   }
   dialogRef.value.acceptParams(params)
 }
-// 删除部门
-const deleteCustomer = async (params: any) => {
-  await useHandleData(CustomerApi.remove, { id: params.id }, `删除【${params.name}】`)
-  proTable.value.getTableList()
-}
-
 // 导出
 const downloadFile = async () => {
   if (initParam) {
@@ -136,6 +130,19 @@ const downloadFile = async () => {
   }).then(() => {
     useDownload(CustomerApi.export, '客户信息', proTable.value.searchParam)
   })
+}
+
+const batchDelete = async (ids: any[]) => {
+  await useHandleData(CustomerApi.remove, ids, '删除所选客户')
+  proTable.value.clearSelection()
+  proTable.value.getTableList()
+}
+
+// 转入公海
+const customerToPublic = async (id: any) => {
+  await useHandleData(CustomerApi.toPublic, { id: id }, '转入公海')
+  proTable.value.clearSelection()
+  proTable.value.getTableList()
 }
 </script>
 
@@ -152,14 +159,16 @@ const downloadFile = async () => {
       :searchCol="{ xs: 2, sm: 3, md: 4, lg: 6, xl: 8 }"
     >
       <!-- 表格 header 按钮 -->
-      <template #tableHeader>
+      <template #tableHeader="scope">
         <el-button type="primary" :icon="CirclePlus" v-hasPermi="['sys:customer:add']" @click="openDrawer('新增')">新增客户</el-button>
         <el-button type="primary" :icon="Download" v-hasPermi="['sys:customer:export']" @click="downloadFile">导出客户</el-button>
+        <el-button type="danger" :icon="Delete" :disabled="!scope.isSelected" v-hasPermi="['sys:customer:remove']" @click="batchDelete(scope.selectedListIds)">批量删除</el-button>
       </template>
       <!-- 表格操作 -->
       <template #operation="scope">
         <el-button type="primary" link :icon="EditPen" v-hasPermi="['sys:customer:edit']" @click="openDrawer('编辑', scope.row)">编辑</el-button>
-        <el-button type="danger" link :icon="Delete" v-hasPermi="['sys:customer:remove']" @click="deleteCustomer(scope.row)">删除</el-button>
+        <el-button type="danger" link :icon="Delete" v-hasPermi="['sys:customer:remove']" @click="batchDelete([scope.row.id])">删除</el-button>
+        <el-button type="warning" link :icon="Share" v-hasPermi="['sys:customer:share']" @click="customerToPublic(scope.row.id)">转入公海</el-button>
       </template>
     </ProTable>
     <CustomerDialog ref="dialogRef" />
