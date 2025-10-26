@@ -90,7 +90,7 @@ props.editorConfig.MENU_CONF!['uploadImage'] = {
     let formData = new FormData()
     formData.append('file', file)
     try {
-      const { data } = await uploadFile(formData)
+      const { data }: any = await uploadFile(formData)
       insertFn(data.fileUrl)
     } catch (error) {
       console.log(error)
@@ -116,7 +116,7 @@ props.editorConfig.MENU_CONF!['uploadVideo'] = {
     let formData = new FormData()
     formData.append('file', file)
     try {
-      const { data } = await uploadVideo(formData)
+      const { data }: any = await uploadVideo(formData)
       insertFn(data.fileUrl)
     } catch (error) {
       console.log(error)

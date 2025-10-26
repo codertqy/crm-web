@@ -4,6 +4,9 @@ import { ColumnProps } from '@/components/ProTable/interface'
 import ProTable from '@/components/ProTable/index.vue'
 import { ProductApi } from '@/api/modules/product'
 import { ProductStatusList } from '@/configs/enum'
+import { CirclePlus, EditPen, Check, Bottom } from '@element-plus/icons-vue'
+import ProductDialog from '@/views/Product/components/ProductDialog.vue'
+import ProductStateDialog from '@/views/Product/components/ProductStateDialog.vue'
 // 获取 ProTable 元素，调用其获取刷新数据方法（还能获取到当前查询参数，方便导出携带参数）
 const proTable = ref()
 
@@ -50,6 +53,32 @@ const columns: ColumnProps[] = [
 
   { prop: 'operation', label: '操作', fixed: 'right', width: 230 }
 ]
+// 打开 drawer(新增、查看、编辑)
+const dialogRef = ref()
+const openDrawer = (title: string, row: Partial<any> = {}) => {
+  let params = {
+    title,
+    row: { ...row },
+    isView: title === '查看',
+    api: ProductApi.saveOrEdit,
+    getTableList: proTable.value.getTableList,
+    maxHeight: '500px'
+  }
+  dialogRef.value.acceptParams(params)
+}
+
+const stateDialogRef = ref()
+const openStateDialog = (title: string, row: Partial<any> = {}) => {
+  let params = {
+    title,
+    row: { ...row },
+    isView: title === '查看',
+    api: ProductApi.saveOrEdit,
+    getTableList: proTable.value.getTableList,
+    maxHeight: '150px'
+  }
+  stateDialogRef.value.acceptParams(params)
+}
 </script>
 <template>
   <div class="table-box">
@@ -64,19 +93,22 @@ const columns: ColumnProps[] = [
       :searchCol="{ xs: 2, sm: 3, md: 4, lg: 6, xl: 8 }"
     >
       <!-- 表格 header 按钮 -->
-      <!-- <template #tableHeader="scope">
-        <el-button type="primary" :icon="CirclePlus" v-hasPermi="['sys:customer:add']" @click="openDrawer('新增')">新增客户</el-button>
-        <el-button type="primary" :icon="Download" v-hasPermi="['sys:customer:export']" @click="downloadFile">导出客户</el-button>
-        <el-button type="danger" :icon="Delete" :disabled="!scope.isSelected" v-hasPermi="['sys:customer:remove']" @click="batchDelete(scope.selectedListIds)">批量删除</el-button>
-      </template> -->
+      <template #tableHeader>
+        <el-button type="primary" :icon="CirclePlus" v-hasPermi="['sys:product:add']" @click="openDrawer('新增')">新增商品</el-button>
+      </template>
       <!-- 表格操作 -->
-      <!-- <template #operation="scope">
-        <el-button type="primary" link :icon="EditPen" v-hasPermi="['sys:customer:edit']" @click="openDrawer('编辑', scope.row)">编辑</el-button>
-        <el-button type="danger" link :icon="Delete" v-hasPermi="['sys:customer:remove']" @click="batchDelete([scope.row.id])">删除</el-button>
-        <el-button type="warning" link :icon="Share" v-hasPermi="['sys:customer:share']" @click="customerToPublic(scope.row.id)">转入公海</el-button>
-      </template> -->
+      <template #operation="scope">
+        <el-button type="primary" link :icon="EditPen" v-hasPermi="['sys:product:edit']" @click="openDrawer('编辑', scope.row)">编辑</el-button>
+        <el-button type="success" link :icon="Check" v-hasPermi="['sys:product:up']" @click="openStateDialog('商品定时上架', scope.row)" v-if="scope.row.status !== 1"
+          >商品上架</el-button
+        >
+        <el-button type="danger" link :icon="Bottom" v-hasPermi="['sys:product:down']" @click="openStateDialog('商品定时下架', scope.row)" v-if="scope.row.status === 1"
+          >商品下架</el-button
+        >
+      </template>
     </ProTable>
-    <CustomerDialog ref="dialogRef" />
+    <ProductDialog ref="dialogRef" />
+    <ProductStateDialog ref="stateDialogRef" />
   </div>
 </template>
 
