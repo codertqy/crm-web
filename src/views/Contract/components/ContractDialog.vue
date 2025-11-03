@@ -82,7 +82,7 @@
               <el-input v-model="scope.row.pName" placeholder="请输入商品" readonly="true" style="width: 180px" />
               <el-button type="primary" style="margin-left: 5px" @click="openProductDialog1(scope.$index)">选择商品</el-button>
               <!-- 使用动态 ref -->
-              <ProductDialog :ref="(el) => setProductRef(el, scope.$index)" @getProductData="(val) => openProductDialog2(val, scope.$index)" />
+              <ProductDialog ref="productRef" @getProductData="(val) => openProductDialog2(val, scope.$index)" />
             </template>
           </el-table-column>
           <el-table-column prop="price" label="单价"> </el-table-column>
@@ -113,7 +113,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, Ref } from 'vue'
+import { ref, reactive } from 'vue'
 import { ElMessage, FormInstance } from 'element-plus'
 import { Dialog } from '@/components/Dialog'
 import CustomerDialog from './CustomerDialog.vue'
@@ -208,11 +208,8 @@ const openCustomerDialog = (val) => {
 }
 
 // 商品传值
-const productRefs = ref([]) as Ref<any> // 存储多个 ProductDialog 实例
-// 设置每个商品行对应的 ProductDialog 实例
-const setProductRef = (el, index) => {
-  productRefs.value[index] = el
-}
+const productRef = ref() // 存储多个 ProductDialog 实例
+
 const editProductIndex = ref(-1)
 // 打开商品列表的弹窗
 const openProductDialog1 = (index) => {
@@ -222,13 +219,15 @@ const openProductDialog1 = (index) => {
     fullScreen: false,
     maxHeight: '500px'
   }
-  productRefs.value[index].acceptParams(params)
+  productRef.value.acceptParams(params)
 }
 // 父组件接收到数据，用来处理多个商品的数据
 const openProductDialog2 = (val, index) => {
+  console.log('商品子组件传递给父组件的商品数据=========》', val)
+
   if (val.id && val.name) {
     dialogProps.value.row.products[index].pName = val.name
-    dialogProps.value.row.products[index].id = val.id
+    dialogProps.value.row.products[index].pId = val.id
     dialogProps.value.row.products[index].price = val.price
     dialogProps.value.row.products[index].count = 1
     dialogProps.value.row.products[index].totalPrice = val.price * 1
