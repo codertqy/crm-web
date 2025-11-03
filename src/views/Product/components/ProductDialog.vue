@@ -74,7 +74,7 @@ const dialogProps = ref<DialogProps>({
   title: '',
   row: {},
   labelWidth: 120,
-  fullscreen: true,
+  fullscreen: false,
   maxHeigh: '500px'
 })
 

@@ -96,3 +96,17 @@ export const ProductStatusList: { [key in ProductStatus]: EnumInfo } = {
   [ProductStatus.ONLINE]: { value: 1, label: '上架' },
   [ProductStatus.OFFLIN]: { value: 2, label: '下架' }
 }
+
+// 合同管理相关列表
+export enum ContractStatus {
+  INITIALIZING,
+  ING,
+  SUCCESS,
+  ERROR
+}
+export const ContractStatusList: { [key in ContractStatus]: EnumInfo } = {
+  [ContractStatus.INITIALIZING]: { value: 0, label: '初始化' },
+  [ContractStatus.ING]: { value: 1, label: '审核中' },
+  [ContractStatus.SUCCESS]: { value: 2, label: '审核通过' },
+  [ContractStatus.ERROR]: { value: 3, label: '审核不通过' }
+}
